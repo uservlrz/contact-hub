@@ -1,7 +1,13 @@
 {
-  "outputDirectory": "frontend",
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }],
-  "functions": { "api/index.js": { "includeFiles": "backend/{src,database}/**" } },
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
+  ],
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "backend/**"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -17,4 +23,3 @@
     }
   ]
 }
-

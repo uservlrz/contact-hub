@@ -84,7 +84,7 @@ contact-hub/
 │       ├── config/ constants/ routes/ controllers/ services/
 │       ├── repositories/      # único lugar com SQL
 │       ├── middlewares/ dto/ sockets/(realtime) utils/
-├── frontend/
+├── public/                    # frontend estático servido na raiz pela CDN da Vercel
 │   ├── index.html · vendor/supabase.js
 │   └── src/ components/ pages/ views/ services/ models/ styles/
 └── docs/ARQUITETURA.md

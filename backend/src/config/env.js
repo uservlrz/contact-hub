@@ -37,7 +37,11 @@ const schema = z.object({
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
   FRONTEND_DIR: z
     .string()
-    .default(fileURLToPath(new URL('../../../frontend', import.meta.url))),
+    .default(
+      existsSync(fileURLToPath(new URL('../../../public', import.meta.url)))
+        ? fileURLToPath(new URL('../../../public', import.meta.url))
+        : fileURLToPath(new URL('../../../frontend', import.meta.url)),
+    ),
   ADMIN_NAME: z.string().default('Administrador'),
   ADMIN_EMAIL: z.string().optional(),
   ADMIN_PASSWORD: z.string().optional(),
