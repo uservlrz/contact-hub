@@ -1,0 +1,14 @@
+{
+  "name": "contact-hub",
+  "private": true,
+  "type": "module",
+  "workspaces": ["backend"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "npm --workspace=backend run start",
+    "dev": "npm --workspace=backend run dev",
+    "migrate": "npm --workspace=backend run migrate",
+    "seed": "npm --workspace=backend run seed",
+    "test": "npm --workspace=backend run test"
+  }
+}
