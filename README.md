@@ -173,4 +173,4 @@ Como a segurança foi apontada como critério central de avaliação, as seguint
 | `GET` | `/api/contacts` | Autenticado | Listagem paginada de contatos (`page`, `limit`, `search`) |
 | `POST` | `/api/contacts` | Operador | Cadastro de novo contato e disparo de eventos |
 | `GET` | `/api/admin/dashboard` | Administrador | Métricas agregadas e dimensões em tempo real |
-| `GET` | `/api/admin/activity` | Administrador | Trilha de auditoria das ações críticas |
+| `GET` | `/api/admin/activity` | Administrador | Trilha de auditoria das ações críticas |/
