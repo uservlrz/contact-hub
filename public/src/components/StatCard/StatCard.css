@@ -9,5 +9,5 @@
 }
 
 .stat-card__label { color: var(--color-muted); font-size: 0.85rem; }
-.stat-card__value { font-size: 2rem; line-height: 1.1; }
+.stat-card__value { font-size: 1.75rem; line-height: 1.1; font-weight: 600; }
 .stat-card__hint { color: var(--color-muted); }

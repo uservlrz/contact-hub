@@ -14,7 +14,6 @@
   border-radius: var(--radius);
   background: var(--color-text);
   color: #fff;
-  box-shadow: var(--shadow);
   font-size: 0.9rem;
 }
 

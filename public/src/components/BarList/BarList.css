@@ -16,6 +16,6 @@
 }
 
 .bars__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bars__track { height: 0.6rem; border-radius: 999px; background: var(--color-bg); overflow: hidden; }
-.bars__fill { display: block; height: 100%; border-radius: 999px; background: var(--color-primary); }
+.bars__track { height: 0.6rem; background: var(--color-bg); overflow: hidden; }
+.bars__fill { display: block; height: 100%; background: var(--color-primary); }
 .bars__value { text-align: right; }

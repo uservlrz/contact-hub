@@ -3,19 +3,16 @@ import { h } from '../utils/dom.js';
 
 const CONTENT_BY_STATUS = {
   [REGISTRATION_STATUS.PENDING]: {
-    icon: '⏳',
     title: 'Aguardando aprovação',
-    text: 'Sua solicitação foi enviada. Esta tela será atualizada automaticamente assim que um administrador analisá-la.',
+    text: 'Sua solicitação foi enviada. Esta tela atualiza sozinha quando um administrador responder.',
   },
   [REGISTRATION_STATUS.APPROVED]: {
-    icon: '✅',
-    title: 'Cadastro aprovado!',
-    text: 'Seu acesso foi liberado. Entre com o e-mail e a senha informados na solicitação.',
+    title: 'Cadastro aprovado',
+    text: 'Seu acesso foi liberado. Entre com o e-mail e a senha que você informou na solicitação.',
   },
   [REGISTRATION_STATUS.REJECTED]: {
-    icon: '⛔',
-    title: 'Solicitação rejeitada',
-    text: 'Seu cadastro não foi aprovado. Procure um administrador para mais informações.',
+    title: 'Solicitação recusada',
+    text: 'Seu cadastro não foi aprovado. Fale com um administrador para saber mais.',
   },
 };
 
@@ -28,8 +25,7 @@ export function WaitingApprovalView({ status, onBackToLogin }) {
     { class: 'auth' },
     h(
       'section',
-      { class: 'auth__card waiting', 'aria-live': 'polite' },
-      h('div', { class: `waiting__icon${isPending ? ' waiting__icon--pulse' : ''}` }, content.icon),
+      { class: 'auth__card', 'aria-live': 'polite' },
       h('h1', { class: 'auth__title' }, content.title),
       h('p', { class: 'auth__subtitle' }, content.text),
       !isPending && h('button', { type: 'button', class: 'button button--block', onclick: onBackToLogin }, 'Ir para o login'),

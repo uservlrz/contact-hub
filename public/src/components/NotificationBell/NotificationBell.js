@@ -18,7 +18,7 @@ export function createNotificationBell() {
   const button = h(
     'button',
     { type: 'button', class: 'bell__button', 'aria-label': 'Notificações', onclick: toggle },
-    '🔔',
+    'Avisos',
     badge,
   );
   const element = h('div', { class: 'bell' }, button, panel);

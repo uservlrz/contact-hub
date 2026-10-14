@@ -17,9 +17,7 @@
 .table th {
   color: var(--color-muted);
   font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-size: 0.85rem;
 }
 
 .table tbody tr:hover { background: var(--color-bg); }
