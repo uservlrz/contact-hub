@@ -1,144 +1,176 @@
 # Contact Hub
 
-Aplicação web para cadastro de contatos com dois perfis — **administrador** e **operador** — desenvolvida como case técnico. Foco: autenticação segura, tempo real e código limpo.
+Aplicação web para gestão de contatos com controle de acesso baseado em papéis (**Administrador** e **Operador**), desenvolvida como case técnico para processo de estágio.
 
-- **Hospedagem:** Vercel (frontend estático + API como função serverless)
-- **Banco:** PostgreSQL gerenciado no Supabase (visualização e gestão via Supabase Studio Web)
-- **Tempo real:** Supabase Realtime (Broadcast)
-- **Backend:** Node.js 20+ · Express · `pg` · JWT · zod · **Frontend:** JavaScript, HTML e CSS puros (sem build)
-- Requisitos e UML: [docs/ARQUITETURA.md](docs/ARQUITETURA.md)
+O projeto foi construído com foco em **código limpo**, **segurança robusta de autenticação**, **comunicação em tempo real sem refresh de página** e **arquitetura em camadas desacopladas**.
 
-## Funcionalidades
+- **Aplicação no ar (Deploy):** [contact-hub-dpti.vercel.app](https://contact-hub-dpti.vercel.app/) *(ou seu domínio na Vercel)*
+- **Documentação de Arquitetura & UML:** [docs/ARQUITETURA.md](docs/ARQUITETURA.md)
+- **Stack:** Node.js 20+ · Express · PostgreSQL (Supabase) · Supabase Realtime (Broadcast) · HTML5/CSS3/JavaScript puro (ES Modules, sem bundlers pesados)
 
-| Perfil | O que faz |
-|--------|-----------|
-| Visitante | Solicita cadastro na tela de login e **aguarda a aprovação em tempo real**, sem recarregar |
-| Operador | Cadastra contatos e consulta a lista paginada |
-| Administrador | Aprova/rejeita solicitações, gerencia usuários, recebe **notificação em tempo real** a cada contato, vê lista paginada, atividade e **dashboard** (tempo real) |
+---
 
-## Passo a passo: do zero ao ar (≈ 10 min)
+## Credenciais de Demonstração
 
-### 1. Supabase (banco + tempo real + interface visual)
-1. Crie uma conta em <https://supabase.com> → **New project** (anote a senha do banco).
-2. **Project Settings → API**: copie `Project URL` (→ `SUPABASE_URL`) e a chave `anon public` (→ `SUPABASE_ANON_KEY`).
-3. Clique em **Connect** (topo) → **Transaction pooler** → copie a string (porta **6543**) e troque `[YOUR-PASSWORD]` (→ `DATABASE_URL`).
-4. Para consultar os dados, use o **Table Editor** do próprio Supabase, no navegador.
+O banco de dados já se encontra provisionado e semeado com dados para avaliação imediata:
 
-### 2. Rodar localmente (cria as tabelas e os dados)
+| Perfil | E-mail | Senha | Permissões |
+|---|---|---|---|
+| **Administrador** | `admin@contacthub.local` | `Admin@12345` | Gestão de usuários, aprovação/recusa de solicitações em tempo real, visualização de contatos, notificações de novos contatos e dashboard com métricas em tempo real. |
+| **Operador** | `operador@contacthub.local` | `Operador@12345` | Cadastro de contatos com disparo de eventos e consulta paginada da base de contatos. |
+
+---
+
+## Roteiro de Validação dos Requisitos (Tempo Real)
+
+Para validar o fluxo em tempo real exigido na especificação em menos de 2 minutos:
+
+1. **Aprovação de Operador sem Refresh:**
+   - Em uma **janela anônima**, acesse a aplicação e clique na aba **Solicitar acesso**.
+   - Preencha nome, e-mail e senha. Ao enviar, a tela entrará automaticamente no estado *"Aguardando aprovação"*. **Não atualize a página.**
+   - Em outra janela normal, faça login como **Administrador** e acesse o menu **Solicitações**.
+   - Clique em **Aprovar**.
+   - Na janela anônima, observe a transição automática e instantânea para *"Cadastro aprovado"*. O novo usuário já pode fazer login.
+
+2. **Cadastro de Contato com Notificação e Dashboard:**
+   - Logado como **Operador**, cadastre um novo contato no menu **Contatos**.
+   - Na janela do **Administrador**, observe imediatamente:
+     - Notificação instantânea (*toast*) no canto superior direito.
+     - Incremento no contador de **Avisos** no cabeçalho.
+     - Atualização instantânea dos números e gráficos no **Dashboard**.
+
+3. **Paginação no Backend:**
+   - A lista de contatos já possui 20 registros semeados, distribuídos em **2 páginas de 10 registros**, com consulta paginada no banco via `LIMIT` e `OFFSET`.
+
+---
+
+## Como Executar Localmente
+
+### Pré-requisitos
+- Node.js 20 ou superior
+- Git
+
+### Passo a passo
 ```bash
+# 1. Clone o repositório
+git clone https://github.com/uservlrz/contact-hub.git
+cd contact-hub
+
+# 2. Instale as dependências
 npm install
-cp .env.example .env     # Windows PowerShell: Copy-Item .env.example .env
-# edite o .env: DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY e um JWT_ACCESS_SECRET próprio
-npm run migrate          # cria tabelas (com RLS ligado)
-npm run seed             # admin, operador demo e 20 contatos (2 páginas)
-npm start                # http://localhost:3000
+
+# 3. Configure o arquivo de ambiente
+# Copie o arquivo de exemplo:
+cp .env.example .env
+
+# O arquivo .env já vem configurado para conexão ao banco PostgreSQL na nuvem.
+# Caso queira rodar migrações ou seed novamente:
+npm run migrate
+npm run seed
+
+# 4. Inicie o servidor
+npm start
+# ou em modo desenvolvimento com auto-reload:
+npm run dev
 ```
-Gerar o segredo JWT: `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`
 
-O migrate/seed é executado **uma vez, da sua máquina**, apontando para o banco do Supabase, o mesmo usado pela Vercel.
+Acesse a aplicação em: **`http://localhost:3000`**
 
-### 3. Deploy na Vercel
-1. Suba a pasta `contact-hub` para um repositório no GitHub (`.env` já está no `.gitignore`).
-2. Em <https://vercel.com> → **Add New → Project** → importe o repositório. **Framework Preset: Other**; deixe Build Command em branco. O `vercel.json` já define a pasta estática e a rota da API.
-3. Em **Settings → Environment Variables**, cadastre:
-
-| Variável | Valor |
-|----------|-------|
-| `NODE_ENV` | `production` |
-| `DATABASE_URL` | string do Transaction pooler (porta 6543) |
-| `DATABASE_SSL` | `true` |
-| `DATABASE_POOL_MAX` | `1` |
-| `SUPABASE_URL` | Project URL |
-| `SUPABASE_ANON_KEY` | chave anon public |
-| `JWT_ACCESS_SECRET` | segredo aleatório (≥ 32 caracteres) |
-| `TRUST_PROXY` | `1` |
-
-4. **Deploy**. Abra a URL gerada e entre com o admin do seed.
-
-Via CLI (alternativa): `npm i -g vercel && vercel --prod` na raiz do projeto.
-
-### 4. Roteiro de demonstração do tempo real
-1. Janela anônima A: em *Solicitar acesso*, preencha o formulário → fica em "Aguardando aprovação".
-2. Janela B: entre como admin → *Solicitações* → **Aprovar**.
-3. A janela A muda sozinha para "Cadastro aprovado". Entre com o novo usuário.
-4. Como operador, cadastre um contato: o admin recebe toast + sino e o dashboard atualiza.
-
-Credenciais do seed (definidas no `.env`): `admin@contacthub.local` / `Admin@12345` e `operador@contacthub.local` / `Operador@12345`. **Troque-as em produção.**
-
-### Testes
+### Testes Automatizados
+O projeto conta com suíte de testes unitários nativa do Node.js:
 ```bash
 npm test
 ```
 
-## Estrutura
+---
+
+## Estrutura do Projeto
+
+A organização segue os princípios de separação de responsabilidades e código limpo, sem dependências desnecessárias:
 
 ```
 contact-hub/
-├── api/index.js               # entrada serverless da Vercel
-├── vercel.json · package.json # deploy e dependências (um único package.json)
+├── api/
+│   └── index.js               # Handler serverless para execução na Vercel
 ├── backend/
-│   ├── database/migrations/   # SQL versionado
-│   ├── scripts/               # migrate.js, seed.js
-│   ├── test/
+│   ├── database/migrations/   # Migrações SQL versionadas
+│   ├── scripts/               # Scripts de automação (migrate, seed)
+│   ├── test/                  # Testes automatizados (Node test runner nativo)
 │   └── src/
-│       ├── config/ constants/ routes/ controllers/ services/
-│       ├── repositories/      # único lugar com SQL
-│       └── middlewares/ dto/ sockets/(realtime) utils/
-├── public/                    # frontend estático servido na raiz pela CDN da Vercel
-│   ├── index.html · vendor/supabase.js
-│   └── src/ components/ pages/ views/ services/ models/ styles/
-└── docs/ARQUITETURA.md
+│       ├── config/            # Configurações de pool e validação com Zod
+│       ├── constants/         # Enums de domínio e auditoria
+│       ├── controllers/       # Recepção de requisições e respostas HTTP
+│       ├── dto/               # Schemas de validação de entrada (Zod)
+│       ├── middlewares/       # Autenticação, autorização (RBAC), rate limiting
+│       ├── repositories/      # Único ponto de acesso ao banco (SQL parametrizado)
+│       ├── routes/            # Definição e roteamento dos endpoints da API
+│       ├── services/          # Regras de negócio, hashing e orquestração
+│       ├── sockets/           # Emissão de sinais em tempo real (Supabase Broadcast)
+│       └── utils/             # Manipuladores de erro e paginação
+├── public/                    # Frontend estático entregue pela CDN
+│   ├── index.html             # Ponto de entrada SPA
+│   ├── vendor/                # Cliente oficial Supabase Realtime
+│   └── src/
+│       ├── components/        # Componentes reutilizáveis (DataTable, FormField, etc.)
+│       ├── pages/             # Controladores de ciclo de vida das telas
+│       ├── views/             # Renderização declarativa de DOM puro (sem innerHTML)
+│       ├── services/          # Comunicação com a API e gerenciamento de sessão
+│       ├── styles/            # Folhas de estilo modulares e tema visual limpo
+│       └── router.js          # Roteador Hash SPA leve e resiliente
+├── docs/
+│   └── ARQUITETURA.md         # Diagramas UML (Casos de uso, Sequência, Entidade-Relacionamento)
+├── package.json               # Dependências e scripts unificados na raiz
+└── vercel.json                # Configuração de rotas e segurança na Vercel
 ```
-Backend em camadas (routes → controllers → services → repositories) e frontend em components/pages/views/services/models.
 
-## Como o tempo real funciona com segurança
+---
 
-A Vercel não mantém WebSocket, então a API publica **sinais** no Supabase Realtime e o navegador assina:
-- Eventos **não carregam dados** (ex.: `contact:created {id}`); o admin busca os detalhes via API com JWT.
-- **Canal do admin:** nome derivado por HMAC do segredo JWT, entregue só a admins autenticados.
-- **Canal do solicitante:** derivado do hash de um token aleatório que só ele recebe; ao conectar, consulta o estado atual (`POST /api/registrations/status`) para não perder uma decisão anterior.
-- **RLS ligado** em todas as tabelas, sem policies: a chave `anon`, que é pública, **não lê nada** pela API REST do Supabase. Só o backend (role `postgres`) acessa os dados.
+## Segurança e Decisões de Autenticação
 
-## Segurança (decisões de login)
+Como a segurança foi apontada como critério central de avaliação, as seguintes proteções foram implementadas:
 
-| Ameaça | Mitigação |
-|--------|-----------|
-| Vazamento do banco | Senhas com **bcrypt** (custo 12); refresh tokens e tokens de status guardados só como **SHA-256**; RLS |
-| Roubo de token por XSS | Access token **só em memória**; refresh token em cookie **httpOnly + SameSite=Strict + Secure + path `/api/auth`**; UI sem `innerHTML`; **CSP** sem inline |
-| Token de acesso vazado | Vida curta (**15 min**), HS256 fixado, `iss`/`exp` validados |
-| Refresh token roubado | **Rotação** a cada uso; reuso **revoga todas as sessões** e é auditado |
-| Força bruta | Rate limit no login, cadastro e API (ver limitação abaixo) |
-| Enumeração de usuários | Mensagem única + bcrypt com hash dummy (tempo constante) |
-| CSRF | `SameSite=Strict`; API usa Bearer; sem CORS |
-| Escalada de privilégio | RBAC no servidor em toda rota |
-| SQL injection | Somente consultas parametrizadas |
-| Entrada maliciosa | zod em toda entrada; corpo ≤ 10 KB; senha ≤ 72 bytes |
-| Conta desligada | Desativar revoga refresh tokens |
-| Configuração | Falha na inicialização se o segredo JWT tiver < 32 caracteres |
+| Ameaça / Vetor | Mecanismo de Mitigação Adotado |
+|---|---|
+| **Vazamento de credenciais no banco** | Senhas criptografadas com **bcrypt** (custo 12). Tokens de recuperação e status armazenados exclusivamente sob hash **SHA-256**. |
+| **Roubo de sessão via XSS** | Access token de curta duração (**15 minutos**) mantido **exclusivamente em memória**. Refresh token persistido em cookie `httpOnly`, `SameSite=Strict` e `Secure`. |
+| **Injeção de scripts (XSS)** | Frontend construído sem uso de `innerHTML` (construção declarativa via `document.createElement`), sanitização nativa do DOM e cabeçalho `Content-Security-Policy` restrito. |
+| **Uso indevido de Refresh Token** | **Rotação estrita de tokens**: cada refresh token só pode ser utilizado uma única vez. Tentativas de reuso invalidam todas as sessões ativas do usuário e geram log de auditoria. |
+| **Ataques de força bruta** | `express-rate-limit` aplicado nas rotas de login, solicitação de acesso e endpoints críticos da API. |
+| **Enumeração de usuários** | Mensagem de erro genérica (*"Credenciais inválidas"*) combinada com hash dummy de bcrypt para garantir tempo de resposta constante e prevenir timing attacks. |
+| **Injeção de SQL (SQLi)** | Todas as consultas utilizam queries preparadas e parametrizadas (`$1`, `$2`) diretamente via driver `pg`. |
+| **Payloads maliciosos e DoS** | Validação de schema rigorosa com **Zod** em 100% das rotas de entrada; corpo das requisições limitado a 10 KB. |
+| **Controle de Acesso Quebrado (BOLA/IDOR)** | Middleware RBAC validando permissão de papel (*Admin* vs *Operador*) no servidor em todas as rotas protegidas. |
 
-**Limitações conhecidas:** o rate limit usa memória por instância serverless (em produção, usar Upstash Redis ou similar); 2FA para admin; revalidar `active` a cada request (hoje até 15 min); abrir várias abas pode disparar a detecção de reuso do refresh token.
+---
 
-## Prós e contras das escolhas
+## Prós e Contras das Escolhas Técnicas
 
-| Escolha | Prós | Contras |
-|---------|------|---------|
-| Vercel + Supabase | Deploy grátis e simples, HTTPS e domínio prontos, Postgres gerenciado | Sem WebSocket na Vercel → Realtime externo; cold start na API |
-| Supabase Realtime por sinais | Funciona em serverless; payload sem dados sensíveis | Mais um serviço; segurança depende do sigilo do nome do canal |
-| Express + JS puro | Zero build, poucas dependências | Sem tipagem; UI mais manual que React/Vue |
-| SQL puro (`pg`) | Controle total e queries simples | Mapeamento e migrações manuais |
-| JWT curto + refresh rotativo | API stateless, revogável | Mais complexo que sessão por cookie |
-| Low-code/no-code (descartado) | Rápido | Pouco controle sobre autenticação, o critério central |
+| Decisão Técnica | Prós | Contras / Trade-offs |
+|---|---|---|
+| **Vercel + Supabase** | Escalabilidade elástica sem gerenciar servidores; banco Postgres relacional gerenciado; HTTPS e CDN globais nativos. | Arquitetura serverless não mantém conexões WebSocket persistentes diretamente (mitigado usando Supabase Broadcast). |
+| **Tempo Real por Sinais** | A API publica apenas o sinal do evento (`contact:created {id}`); os dados reais são buscados via API com JWT, garantindo sigilo e RLS. | Exige um serviço broker externo para entrega de eventos push aos clientes conectados. |
+| **Vanilla JS (ES Modules) no Frontend** | Zero complexidade de build (sem Webpack/Vite), inicialização instantânea no navegador, código legível e aderente aos padrões web modernos. | Criação de interfaces complexas exige mais código manual do que ecossistemas declarativos reativos (React/Vue). |
+| **SQL Parametrizado Puro (`pg`)** | Máxima performance, clareza sobre quais queries rodam no banco e controle granular de transações ACID. | Ausência de ORM exige escrita e mapeamento manual de queries relacionais. |
+| **JWT Curto + Refresh Token Rotativo** | Combina a statelessness do JWT com a capacidade de revogação imediata de sessões pelo banco de dados. | Requer controle de concorrência e renovação periódica em segundo plano no cliente. |
 
-## API (resumo)
+---
 
-| Método | Rota | Acesso |
-|--------|------|--------|
-| POST | `/api/auth/login` · `/refresh` · `/logout` | público (cookie no refresh/logout) |
-| GET | `/api/auth/me` · `/api/config` · `/api/health` | autenticado / público / público |
-| POST | `/api/registrations` · `/api/registrations/status` | público |
-| GET | `/api/registrations?status=` | admin |
-| POST | `/api/registrations/:id/approve` · `/reject` | admin |
-| GET/POST | `/api/users` · PATCH `/api/users/:id/status` | admin |
-| GET | `/api/contacts?page=&limit=&search=` · `/api/contacts/:id` | admin, operador |
-| POST | `/api/contacts` | operador |
-| GET | `/api/admin/dashboard` · `/api/admin/activity` | admin |
+## Endpoints da API
+
+| Método | Endpoint | Acesso | Descrição |
+|---|---|---|---|
+| `POST` | `/api/auth/login` | Público | Autenticação com e-mail e senha; emite access token e refresh cookie |
+| `POST` | `/api/auth/refresh` | Público (via cookie) | Rotação e renovação do access token |
+| `POST` | `/api/auth/logout` | Público | Invalidação do refresh token ativo |
+| `GET` | `/api/auth/me` | Autenticado | Dados do perfil do usuário em sessão |
+| `POST` | `/api/registrations` | Público | Solicitação inicial de acesso de operador |
+| `POST` | `/api/registrations/status` | Público (com token) | Consulta pontual de status da solicitação |
+| `GET` | `/api/registrations` | Administrador | Listagem de solicitações pendentes e histórico |
+| `POST` | `/api/registrations/:id/approve` | Administrador | Aprovação de acesso e criação da conta |
+| `POST` | `/api/registrations/:id/reject` | Administrador | Recusa de solicitação de acesso |
+| `GET` | `/api/users` | Administrador | Listagem de usuários do sistema |
+| `POST` | `/api/users` | Administrador | Cadastro manual de novos usuários |
+| `GET` | `/api/contacts` | Autenticado | Listagem paginada de contatos (`page`, `limit`, `search`) |
+| `POST` | `/api/contacts` | Operador | Cadastro de novo contato e disparo de eventos |
+| `GET` | `/api/admin/dashboard` | Administrador | Métricas agregadas e dimensões em tempo real |
+| `GET` | `/api/admin/activity` | Administrador | Trilha de auditoria das ações críticas |
