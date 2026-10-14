@@ -37,20 +37,6 @@ export function createApp() {
   app.use(express.json({ limit: '10kb' }));
   app.use(cookieParser());
 
-  // Compatibilidade Vercel Serverless: restaura a URL original caso reescrita pelo vercel.json
-  app.use((req, _res, next) => {
-    const originalPath = req.headers['x-matched-path'];
-    if (typeof originalPath === 'string' && originalPath.length > 0) {
-      const queryIndex = req.url.indexOf('?');
-      if (queryIndex !== -1 && !originalPath.includes('?')) {
-        req.url = originalPath + req.url.substring(queryIndex);
-      } else {
-        req.url = originalPath;
-      }
-    }
-    next();
-  });
-
   app.use('/api', apiLimiter, apiRoutes, notFoundHandler);
   // Local: a API também serve o frontend. Na Vercel o frontend é estático (ver vercel.json).
   app.use(express.static(env.FRONTEND_DIR));
