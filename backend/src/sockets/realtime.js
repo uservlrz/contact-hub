@@ -17,7 +17,7 @@ export function adminChannel() {
 }
 
 /** Canal da solicitação: derivado do hash do token de status que só o solicitante conhece. */
-export const registrationChannel = (statusTokenHash) => `registration:${statusTokenHash}`;
+const registrationChannel = (statusTokenHash) => `registration:${statusTokenHash}`;
 
 async function broadcast(topic, event, payload = {}) {
   try {

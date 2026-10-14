@@ -1,21 +1,11 @@
 import dotenv from 'dotenv';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 
-const candidatePaths = [
-  resolve(process.cwd(), '.env'),
-  fileURLToPath(new URL('../../.env', import.meta.url)),
-  fileURLToPath(new URL('../../../.env', import.meta.url)),
-];
+const ROOT_DIR = fileURLToPath(new URL('../../../', import.meta.url));
 
-for (const envPath of candidatePaths) {
-  if (existsSync(envPath)) {
-    dotenv.config({ path: envPath });
-    break;
-  }
-}
+// Na Vercel as variáveis já vêm do ambiente; localmente vêm do .env da raiz.
+dotenv.config({ path: `${ROOT_DIR}.env` });
 
 const booleanFlag = z
   .enum(['true', 'false'])
@@ -35,13 +25,7 @@ const schema = z.object({
   JWT_ACCESS_TTL: z.string().default('15m'),
   REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(7),
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
-  FRONTEND_DIR: z
-    .string()
-    .default(
-      existsSync(fileURLToPath(new URL('../../../public', import.meta.url)))
-        ? fileURLToPath(new URL('../../../public', import.meta.url))
-        : fileURLToPath(new URL('../../../frontend', import.meta.url)),
-    ),
+  FRONTEND_DIR: z.string().default(`${ROOT_DIR}public`),
   ADMIN_NAME: z.string().default('Administrador'),
   ADMIN_EMAIL: z.string().optional(),
   ADMIN_PASSWORD: z.string().optional(),

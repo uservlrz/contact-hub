@@ -1,19 +1,18 @@
 {
   "name": "contact-hub",
+  "version": "1.0.0",
+  "description": "Cadastro de contatos com perfis de administrador e operador, JWT e tempo real.",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "backend"
-  ],
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "start": "npm --workspace=backend run start",
-    "dev": "npm --workspace=backend run dev",
-    "migrate": "npm --workspace=backend run migrate",
-    "seed": "npm --workspace=backend run seed",
-    "test": "npm --workspace=backend run test"
+    "start": "node backend/src/server.js",
+    "dev": "node --watch backend/src/server.js",
+    "migrate": "node backend/scripts/migrate.js",
+    "seed": "node backend/scripts/seed.js",
+    "test": "node --test \"backend/test/*.test.js\""
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

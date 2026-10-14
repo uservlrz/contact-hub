@@ -22,11 +22,10 @@ Aplicação web para cadastro de contatos com dois perfis — **administrador** 
 1. Crie uma conta em <https://supabase.com> → **New project** (anote a senha do banco).
 2. **Project Settings → API**: copie `Project URL` (→ `SUPABASE_URL`) e a chave `anon public` (→ `SUPABASE_ANON_KEY`).
 3. Clique em **Connect** (topo) → **Transaction pooler** → copie a string (porta **6543**) e troque `[YOUR-PASSWORD]` (→ `DATABASE_URL`).
-4. **Supabase Studio:** Todas as tabelas e dados podem ser consultados e editados diretamente no navegador através do menu **Table Editor** do Supabase, dispensando a instalação de clientes pesados como pgAdmin.
+4. Para consultar os dados, use o **Table Editor** do próprio Supabase, no navegador.
 
 ### 2. Rodar localmente (cria as tabelas e os dados)
 ```bash
-cd backend
 npm install
 cp .env.example .env     # Windows PowerShell: Copy-Item .env.example .env
 # edite o .env: DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY e um JWT_ACCESS_SECRET próprio
@@ -36,7 +35,7 @@ npm start                # http://localhost:3000
 ```
 Gerar o segredo JWT: `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`
 
-O migrate/seed é executado **uma vez, da sua máquina**, apontando para o banco do Supabase — o mesmo banco usado pela Vercel.
+O migrate/seed é executado **uma vez, da sua máquina**, apontando para o banco do Supabase, o mesmo usado pela Vercel.
 
 ### 3. Deploy na Vercel
 1. Suba a pasta `contact-hub` para um repositório no GitHub (`.env` já está no `.gitignore`).
@@ -45,6 +44,7 @@ O migrate/seed é executado **uma vez, da sua máquina**, apontando para o banco
 
 | Variável | Valor |
 |----------|-------|
+| `NODE_ENV` | `production` |
 | `DATABASE_URL` | string do Transaction pooler (porta 6543) |
 | `DATABASE_SSL` | `true` |
 | `DATABASE_POOL_MAX` | `1` |
@@ -67,7 +67,7 @@ Credenciais do seed (definidas no `.env`): `admin@contacthub.local` / `Admin@123
 
 ### Testes
 ```bash
-cd backend && npm test
+npm test
 ```
 
 ## Estrutura
@@ -75,7 +75,7 @@ cd backend && npm test
 ```
 contact-hub/
 ├── api/index.js               # entrada serverless da Vercel
-├── vercel.json · package.json # deploy (workspace raiz)
+├── vercel.json · package.json # deploy e dependências (um único package.json)
 ├── backend/
 │   ├── database/migrations/   # SQL versionado
 │   ├── scripts/               # migrate.js, seed.js
@@ -83,13 +83,13 @@ contact-hub/
 │   └── src/
 │       ├── config/ constants/ routes/ controllers/ services/
 │       ├── repositories/      # único lugar com SQL
-│       ├── middlewares/ dto/ sockets/(realtime) utils/
+│       └── middlewares/ dto/ sockets/(realtime) utils/
 ├── public/                    # frontend estático servido na raiz pela CDN da Vercel
 │   ├── index.html · vendor/supabase.js
 │   └── src/ components/ pages/ views/ services/ models/ styles/
 └── docs/ARQUITETURA.md
 ```
-Espelha `puc-cursos-backend` (camadas) e `puc-cursos-plataforma` (components/pages/views/services/models).
+Backend em camadas (routes → controllers → services → repositories) e frontend em components/pages/views/services/models.
 
 ## Como o tempo real funciona com segurança
 

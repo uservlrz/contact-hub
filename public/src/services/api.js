@@ -2,7 +2,7 @@ import * as sessionStore from './sessionStore.js';
 
 const BASE_URL = '/api';
 
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(status, message, details) {
     super(message);
     this.name = 'ApiError';
